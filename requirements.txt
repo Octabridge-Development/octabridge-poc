@@ -1,0 +1,6 @@
+# Requisitos para el proyecto OctaBridge
+Flask==2.1.2
+Werkzeug==2.0.3
+requests==2.28.1
+ibm-watson==6.1.0
+ibm-cloud-sdk-core==3.16.0

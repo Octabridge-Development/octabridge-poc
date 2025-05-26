@@ -1,0 +1,11 @@
+{
+  "skills": {
+    "nlpclassify": "http://localhost:5000/classify",
+    "notifyslack": "http://localhost:5001/notify"
+  },
+  "ibm_cloud": {
+    "resource_group": "Default",
+    "region": "us-south",
+    "api_key": "your_api_key_here"
+  }
+}
