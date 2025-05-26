@@ -1,0 +1,24 @@
+import pytest
+from flask import Flask
+import importlib.util
+import os
+
+# Ruta absoluta al app.py de skill-nlpclassify
+app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../skill-nlpclassify/app.py'))
+spec = importlib.util.spec_from_file_location("nlp_app_module", app_path)
+nlp_app_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(nlp_app_module)
+nlp_app = nlp_app_module.app
+
+@pytest.fixture
+def client():
+    nlp_app.config['TESTING'] = True
+    with nlp_app.test_client() as client:
+        yield client
+
+def test_classify_endpoint(client):
+    response = client.post('/classify', json={"text": "Necesito ayuda con mi pedido"})
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "category" in data
+    assert data["category"] == "soporte"
