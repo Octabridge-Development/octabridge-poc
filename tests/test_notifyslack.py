@@ -20,6 +20,8 @@ def client():
 def test_notify_endpoint(client, monkeypatch):
     # Mock de requests.post para evitar una llamada real a Slack
     import requests
+    import os
+    os.environ["OCTABRIDGE_SLACK_WEBHOOK_URL"] = "http://mock-url"
     class MockResponse:
         status_code = 200
         def json(self):
