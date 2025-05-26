@@ -34,10 +34,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build Docker image for skill-nlpclassify
-        run: docker build -t skill-nlpclassify ./skill-nlpclassify
+        run: docker build -t skill-nlpclassify -f skill-nlpclassify/Dockerfile .
 
       - name: Build Docker image for skill-notifyslack
-        run: docker build -t skill-notifyslack ./skill-notifyslack
+        run: docker build -t skill-notifyslack -f skill-notifyslack/Dockerfile .
 
   deploy:
     runs-on: ubuntu-latest
