@@ -1,14 +1,13 @@
 # Skill Notify Slack
 
 ## Descripción
-Este skill utiliza Flask para exponer un endpoint `/notify` que envía mensajes a un canal de Slack mediante un webhook.
+Este skill expone un endpoint REST `/notify` que envía mensajes a un canal de Slack mediante un webhook. Es útil para notificaciones automáticas desde otros sistemas.
 
-## Requisitos
-- Python 3.9+
-- Flask 2.1.2
-- Requests 2.28.1
+## Validación de entrada
+- El campo `message` debe ser un string no vacío.
+- Si el mensaje es vacío o no es string, se devuelve un error 400.
 
-## Instalación
+## Instalación y ejecución
 1. Instalar dependencias:
    ```bash
    pip install -r requirements.txt
@@ -18,7 +17,7 @@ Este skill utiliza Flask para exponer un endpoint `/notify` que envía mensajes 
    python app.py
    ```
 
-## Uso
+## Uso del endpoint
 Enviar una solicitud POST al endpoint `/notify` con un cuerpo JSON:
 ```json
 {
@@ -32,3 +31,8 @@ Respuesta esperada:
   "status": "success"
 }
 ```
+
+## Notas para desarrolladores
+- El webhook de Slack debe configurarse en la variable `webhook_url` en el código.
+- El código está documentado y preparado para manejo de errores y extensión futura.
+- Revisar los comentarios en `app.py` para entender la lógica y posibles puntos de extensión.

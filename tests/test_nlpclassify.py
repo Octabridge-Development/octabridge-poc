@@ -3,7 +3,7 @@ from flask import Flask
 import importlib.util
 import os
 
-# Ruta absoluta al app.py de skill-nlpclassify
+# Importa dinámicamente la app Flask del skill-nlpclassify
 app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../skill-nlpclassify/app.py'))
 spec = importlib.util.spec_from_file_location("nlp_app_module", app_path)
 nlp_app_module = importlib.util.module_from_spec(spec)
@@ -12,12 +12,15 @@ nlp_app = nlp_app_module.app
 
 @pytest.fixture
 def client():
+    # Configura la app en modo testing y retorna un cliente de pruebas
     nlp_app.config['TESTING'] = True
     with nlp_app.test_client() as client:
         yield client
 
 def test_classify_endpoint(client):
+    # Envía una solicitud POST al endpoint /classify con un texto de prueba
     response = client.post('/classify', json={"text": "Necesito ayuda con mi pedido"})
+    # Verifica que la respuesta sea exitosa y tenga el campo 'category'
     assert response.status_code == 200
     data = response.get_json()
     assert "category" in data

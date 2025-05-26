@@ -1,8 +1,15 @@
 # Requisitos para el proyecto OctaBridge
+# Flask: framework web para los skills
 Flask==2.1.2
+# Werkzeug: dependencia de Flask
 Werkzeug==2.0.3
+# requests: para llamadas HTTP (usado en notifyslack)
 requests==2.28.1
+# ibm-watson: SDK para Watson NLP
 ibm-watson==6.1.0
+# ibm-cloud-sdk-core: núcleo del SDK de IBM Cloud
 ibm-cloud-sdk-core==3.16.0
+# pytest: framework de testing
 pytest==7.4.0
+# pytest-cov: reporte de cobertura de tests
 pytest-cov==4.1.0
