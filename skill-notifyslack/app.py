@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -15,7 +16,10 @@ def notify():
     # Validación robusta de entrada
     if not isinstance(message, str) or not message.strip():
         return jsonify({"error": "El campo 'message' debe ser un string no vacío."}), 400
-    webhook_url = "https://hooks.slack.com/services/..."  # Reemplaza con tu webhook de Slack
+    # Obtener la URL del webhook de Slack de una variable de entorno
+    webhook_url = os.environ.get("OCTABRIDGE_SLACK_WEBHOOK_URL")
+    if not webhook_url:
+        return jsonify({"status": "failure", "error": "No se ha configurado la variable de entorno OCTABRIDGE_SLACK_WEBHOOK_URL"}), 500
     try:
         response = requests.post(webhook_url, json={"text": message})
         if response.status_code == 200:
