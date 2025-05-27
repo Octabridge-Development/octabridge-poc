@@ -1,0 +1,10 @@
+{
+  "nombre": " Maria Lopez ",
+  "empresa": "Tech Solutions",
+  "interes": " Quiero info sobre IA para mi negocio ",
+  "contacto": {
+    "email": "maria.lopez@example.com",
+    "telefono": "+56 9 1234 5678"
+  },
+  "fuente": "Sitio Web"
+}
