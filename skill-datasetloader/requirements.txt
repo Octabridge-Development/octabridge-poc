@@ -1,0 +1,4 @@
+uuid==1.30
+datetime==4.7
+typing-extensions==4.8.0
+boto3==1.34.162py
