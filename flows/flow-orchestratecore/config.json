@@ -1,11 +1,121 @@
 {
+  "project": {
+    "name": "OctaBridge",
+    "version": "0.3",
+    "environment": "poc",
+    "description": "Calificador de leads con IA - PoC IBM Watson"
+  },
   "skills": {
-    "nlpclassify": "http://localhost:5000/classify",
-    "notifyslack": "http://localhost:5001/notify"
+    "skill-intakebasic": {
+      "endpoint": "http://localhost:3000/skill-intakebasic",
+      "type": "python_function",
+      "timeout": 5000,
+      "retries": 2,
+      "health_check": "/health"
+    },
+    "skill-nlpclassify": {
+      "endpoint": "http://localhost:5000/classify",
+      "type": "flask_service",
+      "timeout": 3000,
+      "retries": 3,
+      "health_check": "/health"
+    },
+    "skill-notifyslack": {
+      "endpoint": "http://localhost:5001/notify",
+      "type": "flask_service",
+      "timeout": 10000,
+      "retries": 2,
+      "health_check": "/health"
+    },
+    "skill-datasetloader": {
+      "endpoint": "http://localhost:3001/skill-datasetloader",
+      "type": "python_function",
+      "timeout": 15000,
+      "retries": 1,
+      "health_check": "/health"
+    }
   },
   "ibm_cloud": {
     "resource_group": "Default",
     "region": "us-south",
-    "api_key": "your_api_key_here"
+    "watsonx_orchestrate_instance": "watsonx Orchestrate-10",
+    "api_key_env_var": "IBM_CLOUD_API_KEY"
+  },
+  "watson_assistant": {
+    "version": "2021-06-14",
+    "url": "https://api.us-south.assistant.watson.cloud.ibm.com",
+    "assistant_id_env_var": "IBM_WATSON_ASSISTANT_ID"
+  },
+  "flow_configuration": {
+    "max_parallel_skills": 2,
+    "default_timeout": 30000,
+    "enable_fallbacks": true,
+    "circuit_breaker": {
+      "failure_threshold": 5,
+      "reset_timeout": 60000
+    },
+    "retry_policy": {
+      "max_retries": 3,
+      "initial_delay": 1000,
+      "backoff_multiplier": 2
+    }
+  },
+  "business_rules": {
+    "lead_score_thresholds": {
+      "hot": 75,
+      "warm": 50,
+      "cold": 0
+    },
+    "classification_weights": {
+      "urgente": 25,
+      "venta": 20,
+      "soporte": 15,
+      "consulta": 12,
+      "general": 8
+    },
+    "completeness_bonus": {
+      "email": 15,
+      "phone": 12,
+      "company": 10,
+      "source": 8
+    }
+  },
+  "notifications": {
+    "slack": {
+      "webhook_url_env_var": "OCTABRIDGE_SLACK_WEBHOOK_URL",
+      "channel": "#octabridge-alerts",
+      "mention_on_critical": true
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.gmail.com",
+      "port": 587
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "enable_console": true,
+    "enable_file": false,
+    "correlation_id": true,
+    "include_context": true
+  },
+  "monitoring": {
+    "health_check_interval": 30000,
+    "metrics_collection": true,
+    "performance_tracking": true,
+    "error_reporting": true
+  },
+  "development": {
+    "mock_skills": false,
+    "debug_mode": true,
+    "verbose_logging": true,
+    "test_data_enabled": true
+  },
+  "production": {
+    "enable_security": true,
+    "encrypt_payload": true,
+    "audit_logging": true,
+    "performance_optimization": true,
+    "load_balancing": true
   }
 }
