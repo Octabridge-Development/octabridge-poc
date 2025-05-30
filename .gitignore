@@ -1,0 +1,52 @@
+# === DEPENDENCIAS (NO SUBIR) ===
+node_modules/
+venv/
+__pycache__/
+*.pyc
+.venv/
+
+# === ARCHIVOS DE CONFIGURACIÓN SENSIBLES ===
+.env
+.env.local
+.env.production
+*.log
+
+# === ARCHIVOS TEMPORALES ===
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# === ARCHIVOS DE IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === ARCHIVOS DE BUILD ===
+dist/
+build/
+*.egg-info/
+
+# === ARCHIVOS DE BACKUP ===
+*.bak
+*.backup
+
+# === ARCHIVOS DE WATSON/IBM (si contienen secrets) ===
+watson-credentials.json
+ibm-credentials.env
+
+# === NPM/YARN ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# === PYTHON ===
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+pip-log.txt

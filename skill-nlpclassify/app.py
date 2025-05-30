@@ -62,6 +62,11 @@ def classify():
     logging.info(f"Categoría simulada: {category} (categorías posibles: soporte, venta, urgente, consulta, general)")
     return jsonify({"category": category})
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Endpoint de health check para el skill NLP Classify"""
+    return jsonify({"status": "healthy", "skill": "nlpclassify"})
+
 if __name__ == "__main__":
     # ADVERTENCIA: No usar el servidor de desarrollo de Flask en producción
     app.run(host='0.0.0.0', port=5000)
