@@ -1,0 +1,41 @@
+{
+  "name": "octabridge-flow-orchestratecore",
+  "version": "0.3.0",
+  "description": "Flow principal de orquestación para OctaBridge - Calificador de leads con IA",
+  "main": "main-flow.js",
+  "scripts": {
+    "start": "node main-flow.js",
+    "test": "node test-flow.js",
+    "health": "node health-check.js",
+    "dev": "nodemon main-flow.js",
+    "validate": "node validate-config.js"
+  },
+  "keywords": [
+    "octabridge",
+    "ibm-watson",
+    "orchestrate",
+    "lead-scoring",
+    "ai",
+    "automation"
+  ],
+  "author": "Julio Asillo - OctaBridge Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/octabridge/octabridge-poc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/octabridge/octabridge-poc/issues"
+  },
+  "homepage": "https://github.com/octabridge/octabridge-poc#readme"
+}

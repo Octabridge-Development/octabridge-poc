@@ -1,0 +1,149 @@
+# octabridge-start.ps1 - Script PowerShell para levantar OctaBridge en Windows
+
+Write-Host "🚀 Iniciando OctaBridge PoC v0.3..." -ForegroundColor Green
+
+# Función para verificar si un puerto está libre
+function Test-Port {
+    param([int]$Port)
+
+    try {
+        $connection = New-Object System.Net.Sockets.TcpClient
+        $connection.Connect("localhost", $Port)
+        $connection.Close()
+        Write-Host "❌ Puerto $Port ya está en uso" -ForegroundColor Red
+        return $false
+    }
+    catch {
+        Write-Host "✅ Puerto $Port disponible" -ForegroundColor Green
+        return $true
+    }
+}
+
+# Verificar puertos necesarios
+Write-Host "🔍 Verificando puertos..." -ForegroundColor Yellow
+$ports = @(3000, 3001, 5000, 5001)
+foreach ($port in $ports) {
+    if (-not (Test-Port -Port $port)) {
+        Write-Host "Deteniendo script debido a puerto ocupado: $port" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Configurar variables de entorno para esta sesión
+$env:OCTABRIDGE_SLACK_WEBHOOK_URL = "https://hooks.slack.com/triggers/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"
+
+# Función para iniciar skill con wrapper Flask
+function Start-SkillWithFlask {
+    param(
+        [string]$SkillName,
+        [int]$Port,
+        [string]$Endpoint,
+        [string]$SkillDir
+    )
+
+    Write-Host "🔄 Iniciando $SkillName en puerto $Port..." -ForegroundColor Yellow
+
+    # Cambiar al directorio del skill
+    Push-Location $SkillDir
+
+    # Crear wrapper Flask temporal
+    $flaskWrapper = @"
+from main import main
+from flask import Flask, request, jsonify
+import os
+
+app = Flask(__name__)
+
+@app.route('$Endpoint', methods=['POST'])
+def skill_endpoint():
+    try:
+        result = main(request.json)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"statusCode": 500, "body": {"status": "error", "message": str(e)}}), 500
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy", "skill": "$SkillName"})
+
+if __name__ == '__main__':
+    print("🎯 $SkillName corriendo en puerto $Port")
+    app.run(host='0.0.0.0', port=$Port, debug=False)
+"@
+
+    # Escribir el wrapper a un archivo
+    $flaskWrapper | Out-File -FilePath "flask_wrapper.py" -Encoding UTF8
+
+    # Activar entorno virtual si existe
+    if (Test-Path "venv\Scripts\activate.ps1") {
+        & "venv\Scripts\activate.ps1"
+    }
+
+    # Ejecutar en background usando Start-Process
+    $process = Start-Process python -ArgumentList "flask_wrapper.py" -PassThru -WindowStyle Hidden
+    Write-Host "  ✅ $SkillName iniciado (PID: $($process.Id))" -ForegroundColor Green
+
+    # Volver al directorio anterior
+    Pop-Location
+
+    Start-Sleep -Seconds 2
+}
+
+# Levantar skills que necesitan wrapper
+Write-Host "🏗️ Levantando skills..." -ForegroundColor Yellow
+Start-SkillWithFlask -SkillName "skill-intakebasic" -Port 3000 -Endpoint "/skill-intakebasic" -SkillDir "skill_intakebasic"
+Start-SkillWithFlask -SkillName "skill-datasetloader" -Port 3001 -Endpoint "/skill-datasetloader" -SkillDir "skill-datasetloader"
+
+# Levantar skill-nlpclassify
+Write-Host "🔄 Iniciando skill-nlpclassify en puerto 5000..." -ForegroundColor Yellow
+Push-Location "skill-nlpclassify"
+if (Test-Path "venv\Scripts\activate.ps1") {
+    & "venv\Scripts\activate.ps1"
+}
+$nlpProcess = Start-Process python -ArgumentList "app.py" -PassThru -WindowStyle Hidden
+Write-Host "  ✅ skill-nlpclassify iniciado (PID: $($nlpProcess.Id))" -ForegroundColor Green
+Pop-Location
+
+# Levantar skill-notifyslack
+Write-Host "🔄 Iniciando skill-notifyslack en puerto 5001..." -ForegroundColor Yellow
+Push-Location "skill-notifyslack"
+if (Test-Path "venv\Scripts\activate.ps1") {
+    & "venv\Scripts\activate.ps1"
+}
+$slackProcess = Start-Process python -ArgumentList "app.py" -PassThru -WindowStyle Hidden
+Write-Host "  ✅ skill-notifyslack iniciado (PID: $($slackProcess.Id))" -ForegroundColor Green
+Pop-Location
+
+# Esperar a que todos los skills estén listos
+Write-Host "⏳ Esperando que los skills estén listos..." -ForegroundColor Yellow
+Start-Sleep -Seconds 8
+
+# Verificar que todos los skills responden
+Write-Host "🏥 Verificando health checks..." -ForegroundColor Yellow
+foreach ($port in $ports) {
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost:$port/health" -TimeoutSec 5 -UseBasicParsing
+        if ($response.StatusCode -eq 200) {
+            Write-Host "  ✅ Skill en puerto $port`: OK" -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Host "  ❌ Skill en puerto $port`: FALLO" -ForegroundColor Red
+    }
+}
+
+Write-Host ""
+Write-Host "🎉 ¡OctaBridge PoC está listo!" -ForegroundColor Green
+Write-Host ""
+Write-Host "📋 URLs disponibles:" -ForegroundColor Cyan
+Write-Host "  • http://localhost:3000/health (skill-intakebasic)"
+Write-Host "  • http://localhost:5000/health (skill-nlpclassify)"
+Write-Host "  • http://localhost:5001/health (skill-notifyslack)"
+Write-Host "  • http://localhost:3001/health (skill-datasetloader)"
+Write-Host ""
+Write-Host "🧪 Para probar el sistema completo:" -ForegroundColor Cyan
+Write-Host "  cd flows\flow-orchestratecore"
+Write-Host "  node test-flow.js"
+Write-Host ""
+Write-Host "🛑 Para detener todos los servicios:" -ForegroundColor Yellow
+Write-Host "  Get-Process python | Where-Object {`$_.ProcessName -eq 'python'} | Stop-Process"

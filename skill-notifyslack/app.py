@@ -29,6 +29,11 @@ def notify():
     except Exception as e:
         return jsonify({"status": "failure", "error": str(e)}), 500
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Endpoint de health check para el skill Notify Slack"""
+    return jsonify({"status": "healthy", "skill": "notifyslack"})
+
 if __name__ == "__main__":
     # Ejecutar el servidor Flask en modo desarrollo
     app.run(host='0.0.0.0', port=5001)
