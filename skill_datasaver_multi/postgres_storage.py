@@ -9,9 +9,9 @@ import os
 class PostgresStorageDriver:
     def __init__(self):
         self.conn = psycopg2.connect(
-            dbname=os.getenv('PGDATABASE', 'octabridge'),
+            dbname=os.getenv('PGDATABASE', 'test_db'),
             user=os.getenv('PGUSER', 'postgres'),
-            password=os.getenv('PGPASSWORD', ''),
+            password=os.getenv('PGPASSWORD', 'postgres'),
             host=os.getenv('PGHOST', 'localhost'),
             port=int(os.getenv('PGPORT', 5432))
         )
