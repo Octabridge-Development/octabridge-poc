@@ -1,0 +1,37 @@
+version: '3.8' # Se recomienda usar una versión reciente y compatible. 3.8 es común.
+
+services:
+  # Servicio para skill-intakebasic
+  intake-basic:
+    build:
+      # El 'context' es la ruta relativa desde este docker-compose.yml
+      # hasta la carpeta donde se encuentra el Dockerfile de skill_intakebasic.
+      # '..' sube un nivel a 'octabridge-poc', y luego entra en 'skill_intakebasic'.
+      context: ../skill_intakebasic
+      dockerfile: Dockerfile # Indica que el Dockerfile se llama 'Dockerfile' y está en el 'context'.
+    container_name: octabridge-intake-basic # Nombre del contenedor para fácil identificación
+    restart: unless-stopped # Política de reinicio: el contenedor se reiniciará a menos que se detenga explícitamente.
+    # environment: # Descomentar y rellenar si necesitas variables de entorno específicas para este skill.
+    #   MY_ENV_VAR: "some_value"
+    # ports: # Descomentar y rellenar si este skill expone un puerto (ej. si es una API web).
+    #   - "8000:8000" # Mapea el puerto 8000 de tu máquina host al puerto 8000 del contenedor.
+    # volumes: # Descomentar si necesitas persistir datos o montar directorios.
+    #   - ./data:/app/data # Ejemplo: monta una carpeta 'data' local en '/app/data' dentro del contenedor.
+
+  # Otros servicios del proyecto OctaBridge irán aquí
+  # Por ejemplo, si Julio o Felipe dockerizan otros skills o componentes,
+  # sus servicios se añadirán en este mismo archivo.
+
+  # Ejemplo de cómo se vería otro servicio (ej. skill-datasetloader si lo dockerizan):
+  # skill-datasetloader:
+  #   build:
+  #     context: ../skill_datasetloader # Suponiendo una estructura similar
+  #     dockerfile: Dockerfile
+  #   container_name: octabridge-dataset-loader
+  #   restart: unless-stopped
+  #   environment:
+  #     IBM_COS_ENDPOINT: "tu_endpoint_cos"
+  #     IBM_COS_API_KEY: "tu_api_key_cos"
+  #     IBM_COS_BUCKET_NAME: "tu_bucket_name_cos"
+  #   depends_on:
+  #     - intake-basic # Si datasetloader depende de intake-basic
