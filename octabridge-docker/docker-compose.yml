@@ -1,37 +1,50 @@
 version: '3.8' # Se recomienda usar una versión reciente y compatible. 3.8 es común.
 
 services:
-  # Servicio para skill-intakebasic
+  # Servicio para skill-intakebasic (¡NO BORRADO, AQUÍ ESTÁ!)
   intake-basic:
     build:
-      # El 'context' es la ruta relativa desde este docker-compose.yml
-      # hasta la carpeta donde se encuentra el Dockerfile de skill_intakebasic.
-      # '..' sube un nivel a 'octabridge-poc', y luego entra en 'skill_intakebasic'.
-      context: ../skill_intakebasic
-      dockerfile: Dockerfile # Indica que el Dockerfile se llama 'Dockerfile' y está en el 'context'.
+      context: ../skill_intakebasic # Ruta relativa a la carpeta de skill_intakebasic
+      dockerfile: Dockerfile # Nombre del Dockerfile dentro de esa carpeta
     container_name: octabridge-intake-basic # Nombre del contenedor para fácil identificación
     restart: unless-stopped # Política de reinicio: el contenedor se reiniciará a menos que se detenga explícitamente.
-    # environment: # Descomentar y rellenar si necesitas variables de entorno específicas para este skill.
-    #   MY_ENV_VAR: "some_value"
-    # ports: # Descomentar y rellenar si este skill expone un puerto (ej. si es una API web).
-    #   - "8000:8000" # Mapea el puerto 8000 de tu máquina host al puerto 8000 del contenedor.
-    # volumes: # Descomentar si necesitas persistir datos o montar directorios.
-    #   - ./data:/app/data # Ejemplo: monta una carpeta 'data' local en '/app/data' dentro del contenedor.
+    # Nota: skill-intakebasic es un script que ejecuta pruebas y termina, por eso no necesita puertos expuestos.
+    # Puedes añadir límites de recursos a intake-basic también, similar a dataset-loader si lo deseas:
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 256M # Ejemplo de límite para intake-basic
+    #       cpus: '0.25'
 
-  # Otros servicios del proyecto OctaBridge irán aquí
-  # Por ejemplo, si Julio o Felipe dockerizan otros skills o componentes,
-  # sus servicios se añadirán en este mismo archivo.
-
-  # Ejemplo de cómo se vería otro servicio (ej. skill-datasetloader si lo dockerizan):
-  # skill-datasetloader:
-  #   build:
-  #     context: ../skill_datasetloader # Suponiendo una estructura similar
-  #     dockerfile: Dockerfile
-  #   container_name: octabridge-dataset-loader
-  #   restart: unless-stopped
-  #   environment:
-  #     IBM_COS_ENDPOINT: "tu_endpoint_cos"
-  #     IBM_COS_API_KEY: "tu_api_key_cos"
-  #     IBM_COS_BUCKET_NAME: "tu_bucket_name_cos"
-  #   depends_on:
-  #     - intake-basic # Si datasetloader depende de intake-basic
+  # Servicio para skill-datasetloader (con optimizaciones de recursos y ruta corregida)
+  dataset-loader:
+    build:
+      # *** RUTA CORREGIDA: Usando el guion '-' en 'skill-datasetloader' ***
+      context: C:/Users/belfo/Documents/GitHub/octabridge-poc/skill-datasetloader
+      dockerfile: Dockerfile # Nombre del Dockerfile dentro de esa carpeta
+    container_name: octabridge-dataset-loader # Nombre único para el contenedor
+    restart: unless-stopped # Mantener el servicio corriendo (es una API Flask)
+    ports:
+      # Mapea el puerto 3001 de tu máquina host al puerto 3001 del contenedor.
+      # Así podrás acceder a la API desde tu máquina local en http://localhost:3001
+      - "3001:3001"
+    environment:
+      # Tus credenciales HMAC para IBM COS.
+      # ¡IMPORTANTE! Reemplaza los valores de ejemplo con tus credenciales REALES.
+      COS_ACCESS_KEY_ID: "ef85e41b58dc4518a8e387bd6f2c7c744" # <-- ¡Pon tu clave real aquí!
+      COS_SECRET_ACCESS_KEY: "b79083b77a90f97f2bd6fc3e3cb5e19a695387e51b43eb49" # <-- ¡Pon tu secreto real aquí!
+      COS_BUCKET_NAME: "ibm-cos-bucket" # <-- ¡Pon tu nombre de bucket real aquí!
+      COS_REGION: "ca-tor" # <-- ¡Pon tu región real aquí!
+      COS_ENDPOINT: "https://s3.ca-tor.cloud-object-storage.appdomain.cloud" # <-- ¡Pon tu endpoint real aquí!
+    # --- INICIO DE CAMBIOS PARA OPTIMIZACIÓN DE RECURSOS ---
+    deploy:
+      resources:
+        limits:
+          memory: 512M # Límite de memoria: 512 Megabytes
+          cpus: '0.5'  # Límite de CPU: 0.5 de un núcleo de CPU
+        reservations: # Opcional: reservar un mínimo de recursos
+          memory: 256M # Reserva de memoria: 256 Megabytes
+          cpus: '0.25' # Reserva de CPU: 0.25 de un núcleo de CPU
+    # --- FIN DE CAMBIOS ---
+    # depends_on: # Descomentar y listar si dataset-loader depende de otro servicio (ej. una base de datos)
+    #   - some_database_service
