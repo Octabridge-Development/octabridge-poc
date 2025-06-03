@@ -1,8 +1,5 @@
 import pytest
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../skill-datasaver-multi')))
-from main import DataSaverMulti
+from skill_datasaver_multi.main import DataSaverMulti
 
 def test_persistencia_basica():
     ds = DataSaverMulti()
