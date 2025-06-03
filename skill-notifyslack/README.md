@@ -32,6 +32,44 @@ Respuesta esperada:
 }
 ```
 
+## 🐳 Containerización
+
+### Construcción de la Imagen Docker
+Para construir la imagen Docker de este skill, ejecute el siguiente comando desde el directorio del skill:
+
+```bash
+sudo docker build -t skill-notifyslack:latest .
+```
+
+### Ejecución del Contenedor
+Para ejecutar el contenedor en el puerto 8001:
+
+```bash
+sudo docker run -d -p 8001:5001 --name notify-slack -e OCTABRIDGE_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/test-webhook-url skill-notifyslack:latest
+```
+
+### Pruebas Locales
+
+#### Verificar el estado del servicio
+Ejecute el siguiente comando para verificar el estado del servicio:
+
+```bash
+curl http://localhost:8001/health
+```
+
+#### Enviar una notificación
+Envíe un mensaje de ejemplo al endpoint `/notify`:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"message": "Prueba de notificación a Slack"}' http://localhost:8001/notify
+```
+
+El servicio debería responder con un estado de éxito, por ejemplo:
+
+```json
+{"status":"success"}
+```
+
 ## Notas para desarrolladores
 - El webhook de Slack debe configurarse en la variable `webhook_url` en el código.
 - El código está documentado y preparado para manejo de errores y extensión futura.

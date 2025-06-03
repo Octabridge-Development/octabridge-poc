@@ -23,7 +23,7 @@ Este flow es el **cerebro central** de OctaBridge que orquesta todos los skills 
        │                                                 │                                                 │
        ▼                          ▼                      ▼                          ▼
 ┌──────────────┐          ┌──────────────┐        ┌──────────────┐          ┌──────────────┐
-│skill-intake  │          │skill-nlp     │        │skill-dataset │          │skill-notify  │
+│skill-intake  │          │skill-nlp     │        │skill-dataset │          │skill-notify  │un video
 │basic         │          │classify      │        │loader        │          │slack         │
 │(Python)      │          │(Python)      │        │(Python)      │          │(Python)      │
 │              │          │              │        │              │          │              │

@@ -50,3 +50,41 @@ Respuesta esperada:
 - El código está documentado y preparado para integración futura con IBM Watson NLP.
 - Para pruebas locales, solo se usa la lógica heurística.
 - Revisar los comentarios en `app.py` para entender la lógica y posibles puntos de extensión.
+
+## 🐳 Containerización
+
+### Construcción de la Imagen Docker
+Para construir la imagen Docker de este skill, ejecute el siguiente comando desde el directorio del skill:
+
+```bash
+sudo docker build -t skill-nlpclassify:latest .
+```
+
+### Ejecución del Contenedor
+Para ejecutar el contenedor en el puerto 8000:
+
+```bash
+sudo docker run -d -p 8000:8000 --name nlp-classify skill-nlpclassify:latest
+```
+
+### Pruebas Locales
+
+#### Verificar el estado del servicio
+Ejecute el siguiente comando para verificar el estado del servicio:
+
+```bash
+curl http://localhost:8000/health
+```
+
+#### Clasificar un texto
+Envíe un texto de ejemplo al endpoint `/classify`:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"text": "Necesito ayuda con mi pedido"}' http://localhost:8000/classify
+```
+
+El servicio debería responder con una categoría, por ejemplo:
+
+```json
+{"category":"soporte"}
+```
