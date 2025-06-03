@@ -10,6 +10,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: octabridge
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ""
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - name: Checkout code  # Descarga el código fuente
         uses: actions/checkout@v3
@@ -28,7 +42,20 @@ jobs:
       - name: Set PYTHONPATH  # Asegura que el root esté en el path de Python
         run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            pg_isready -h localhost -p 5432 -U postgres && break
+            sleep 2
+          done
+
       - name: Run tests  # Ejecuta los tests con cobertura
+        env:
+          PGDATABASE: octabridge
+          PGUSER: postgres
+          PGPASSWORD: ""
+          PGHOST: localhost
+          PGPORT: 5432
         run: pytest tests/ --cov=skill_datasaver_multi --cov-report=term-missing
   build:
     runs-on: ubuntu-latest
