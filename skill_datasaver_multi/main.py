@@ -2,7 +2,7 @@
 Skill para persistencia dual: PostgreSQL y (futuro) IBM COS.
 Optimizado para manejo seguro de recursos y extensibilidad.
 """
-from postgres_storage import PostgresStorageDriver
+from .postgres_storage import PostgresStorageDriver
 
 # Placeholder para IBM COS driver (cuando esté disponible)
 # from ibm_cos_storage import IbmCosStorageDriver
