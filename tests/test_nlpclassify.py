@@ -2,6 +2,8 @@ import pytest
 from flask import Flask
 import importlib.util
 import os
+import time
+import logging
 
 # Importa dinámicamente la app Flask del skill-nlpclassify
 app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../skill-nlpclassify/app.py'))
@@ -25,3 +27,30 @@ def test_classify_endpoint(client):
     data = response.get_json()
     assert "category" in data
     assert data["category"] == "soporte"
+
+def test_valid_classification(client):
+    response = client.post('/classify', json={"text": "Necesito ayuda con mi pedido"})
+    assert response.status_code == 200
+    assert response.json['category'] == 'soporte'
+
+def test_invalid_input(client):
+    tests = [
+        {"text": ""},
+        {"text": "a"},
+        {},
+        {"text": 123},
+        {"text": "A" * 501}
+    ]
+    for data in tests:
+        response = client.post('/classify', json=data)
+        assert response.status_code == 400
+
+def test_performance(client):
+    start_time = time.time()
+    test_cases = 100
+    for _ in range(test_cases):
+        client.post('/classify', json={"text": "Consulta sobre productos disponibles"})
+    duration = time.time() - start_time
+    avg_time = duration / test_cases * 1000
+    logging.info(f"Performance test: {test_cases} requests en {duration:.2f}s ({avg_time:.2f}ms/req)")
+    assert avg_time < 50.0

@@ -1,8 +1,15 @@
 from flask import Flask, request, jsonify
 import requests
 import os
+import logging
 
 app = Flask(__name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('notifyslack')
 
 @app.route('/notify', methods=['POST'])
 def notify():
@@ -11,22 +18,29 @@ def notify():
     Entrada: JSON con campo 'message'.
     Salida: JSON con 'status' (success/failure) y error si aplica.
     """
-    data = request.json
-    message = data.get('message')
-    # Validación robusta de entrada
-    if not isinstance(message, str) or not message.strip():
-        return jsonify({"error": "El campo 'message' debe ser un string no vacío."}), 400
-    # Obtener la URL del webhook de Slack de una variable de entorno
-    webhook_url = os.environ.get("OCTABRIDGE_SLACK_WEBHOOK_URL")
-    if not webhook_url:
-        return jsonify({"status": "failure", "error": "No se ha configurado la variable de entorno OCTABRIDGE_SLACK_WEBHOOK_URL"}), 500
     try:
-        response = requests.post(webhook_url, json={"text": message})
-        if response.status_code == 200:
-            return jsonify({"status": "success"}), 200
-        else:
-            return jsonify({"status": "failure", "error": response.text}), response.status_code
+        data = request.get_json()
+        message = data.get('message')
+        # Validación robusta de entrada
+        if not isinstance(message, str) or not message.strip():
+            return jsonify({"error": "El campo 'message' debe ser un string no vacío."}), 400
+        # Obtener la URL del webhook de Slack de una variable de entorno
+        webhook_url = os.environ.get("OCTABRIDGE_SLACK_WEBHOOK_URL")
+        if not webhook_url:
+            return jsonify({"status": "failure", "error": "No se ha configurado la variable de entorno OCTABRIDGE_SLACK_WEBHOOK_URL"}), 500
+        try:
+            response = requests.post(webhook_url, json={"text": message})
+            if response.status_code == 200:
+                logger.info(f"Notificación enviada a Slack: '{message[:30]}...'")
+                return jsonify({"status": "success"}), 200
+            else:
+                logger.error(f"Error Slack: {response.text}")
+                return jsonify({"status": "failure", "error": response.text}), response.status_code
+        except Exception as e:
+            logger.exception(f"Error al enviar notificación a Slack: {str(e)}")
+            return jsonify({"status": "failure", "error": str(e)}), 500
     except Exception as e:
+        logger.exception(f"Error crítico: {str(e)}")
         return jsonify({"status": "failure", "error": str(e)}), 500
 
 @app.route('/health', methods=['GET'])
@@ -36,4 +50,4 @@ def health():
 
 if __name__ == "__main__":
     # Ejecutar el servidor Flask en modo desarrollo
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5001, threaded=True, debug=False)

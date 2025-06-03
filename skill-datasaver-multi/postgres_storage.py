@@ -45,7 +45,7 @@ class PostgresStorageDriver:
             row = cur.fetchone()
             if not row:
                 raise FileNotFoundError(f'No object found for bucket={Bucket}, key={Key}')
-            return row['data']
+            return bytes(row['data'])
 
     def delete_object(self, Bucket, Key):
         with self.conn.cursor() as cur:
