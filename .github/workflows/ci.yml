@@ -6,9 +6,8 @@ on:
     branches:
       - main
       - feature/**
-
 jobs:
-test:
+ test:
   runs-on: ubuntu-latest
   services:
     postgres:
@@ -56,7 +55,7 @@ test:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       run: pytest tests/ --cov=skill_datasaver_multi --cov-report=term-missing
       
-  build:
+ build:
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -69,7 +68,7 @@ test:
       - name: Build Docker image for skill-notifyslack  # Construye imagen Docker para notificaciones
         run: docker build -t skill-notifyslack -f skill-notifyslack/Dockerfile .
 
-  deploy:
+ deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
